@@ -29,3 +29,15 @@ Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
 
 B<tracepm> runs your Perl script under C<perl -c> and lists modules being
 required. You can filter only displaying the modules matching some criteria.
+
+
+=head1 TODO
+
+=over
+
+=item * Option to use C<perl> instead of C<perl -c>
+
+To be able to include modules being required during run-time instead of
+compile-time.
+
+=back
