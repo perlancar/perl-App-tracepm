@@ -6,7 +6,6 @@ use warnings;
 #use experimental 'smartmatch';
 use Log::Any '$log';
 
-use App::FatPacker;
 use File::Temp qw(tempfile);
 use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
@@ -36,13 +35,32 @@ $SPEC{tracepm} = {
             req => 1,
             pos => 0,
         },
-        #args => {
-        #    summary => 'Script arguments',
-        #    schema => ['array*' => of => 'str*'],
-        #    req => 0,
-        #    pos => 1,
-        #    greedy => 0,
-        #},
+        method => {
+            summary => 'Tracing method to use',
+            schema => ['str*', in=>[qw/fatpacker require/]],
+            default => 'fatpacker',
+            description => <<'_',
+
+There are two tracing methods that can be used. The first (and default) is
+`fatpacker`, using `fatpacker trace`. This method runs the script using `perl
+-c` option then collect the populated `%INC`. Only modules loaded during compile
+time are detected.
+
+The second method (`require`) runs your script normally, but replaces
+`CORE::GLOBAL::require()` with a routine that logs the require() argument to the
+log file. Modules loaded during runtime is also logged. But some modules might
+not work, specifically modules that also overrides require() (there should be
+only a handful of modules that do this though).
+
+_
+        },
+        args => {
+            summary => 'Script arguments',
+            schema => ['array*' => of => 'str*'],
+            req => 0,
+            pos => 1,
+            greedy => 0,
+        },
         perl_version => {
             summary => 'Perl version, defaults to current running version',
             description => <<'_',
@@ -89,19 +107,29 @@ _
 sub tracepm {
     my %args = @_;
 
+    my $method = $args{method};
     my $plver = version->parse($args{perl_version} // $^V);
 
     my ($outfh, $outf) = tempfile();
 
-    my $fp = App::FatPacker->new;
-    $fp->trace(
-        output => ">>$outf",
-        use    => $args{use},
-        args   => [$args{script}, @{$args{args} // []}],
-    );
+    if ($method eq 'fatpacker') {
+        require App::FatPacker;
+        my $fp = App::FatPacker->new;
+        $fp->trace(
+            output => ">>$outf",
+            use    => $args{use},
+            args   => [$args{script}, @{$args{args} // []}],
+        );
+    } else {
+        system($^X,
+               "-MApp::tracepm::Tracer=$outf",
+               (map {"-M$_"} @{$args{use} // []}),
+               $args{script}, @{$args{args} // []},
+           );
+    }
 
     open my($fh), "<", $outf
-        or die "Can't open fatpacker trace output: $!";
+        or die "Can't open trace output: $!";
 
     my @res;
     my $i = 0;

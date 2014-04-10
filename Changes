@@ -1,5 +1,10 @@
 Revision history for App-tracepm
 
+0.02    2014-04-10 (SHARYANTO)
+
+        - Add trace method: require.
+
+
 0.01    2014-04-08 (SHARYANTO)
 
         - First release.
