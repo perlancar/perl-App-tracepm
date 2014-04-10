@@ -1,5 +1,14 @@
 Revision history for App-tracepm
 
+0.03    2014-04-10 (SHARYANTO)
+
+        - Add field 'by' for method 'require', to see which package loads which
+          module.
+
+        - Remove field 'seq' for method 'fatpacker' since fatpacker tracer dumps
+          %INC keys which are unordered.
+
+
 0.02    2014-04-10 (SHARYANTO)
 
         - Add trace method: require.
