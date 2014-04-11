@@ -3,7 +3,7 @@ package App::tracepm;
 use 5.010001;
 use strict;
 use warnings;
-#use experimental 'smartmatch';
+use experimental 'smartmatch';
 use Log::Any '$log';
 
 use Module::CoreList;
@@ -69,7 +69,8 @@ There are several tracing methods that can be used:
 
 * `prereqscanner_recurse`: Like `prereqscanner`, but will recurse into all
   non-core modules until they are exhausted. Modules that are not found will be
-  skipped.
+  skipped. It is recommended to use the various `recurse_exclude_*` options
+  options to limit recursion.
 
 * `prereqscanner_lite`: This method is like the `prereqscanner` method, but
   instead of `Perl::PrereqScanner` it uses `Perl::PrereqScanner::Lite`. The
@@ -79,6 +80,26 @@ There are several tracing methods that can be used:
 * `prereqscanner_lite_recurse`: Like `prereqscanner_lite`, but recurses.
 
 _
+        },
+        cache_prereqscanner => {
+            summary => "Whether cache Perl::PrereqScanner{,::Lite} result",
+            schema => ['bool' => default=>0],
+        },
+        recurse_exclude => {
+            summary => 'When recursing, exclude some modules',
+            schema => ['array*' => of => 'str*'],
+        },
+        recurse_exclude_pattern => {
+            summary => 'When recursing, exclude some module patterns',
+            schema => ['array*' => of => 'str*'], # XXX array of re
+        },
+        recurse_exclude_xs => {
+            summary => 'When recursing, exclude XS modules',
+            schema => ['bool'],
+        },
+        recurse_exclude_core => {
+            summary => 'When recursing, exclude core modules',
+            schema => ['bool'],
         },
         args => {
             summary => 'Script arguments',
@@ -211,7 +232,14 @@ sub tracepm {
 
     } elsif ($method =~ /\A(?:prereqscanner|prereqscanner_lite)(_recurse)?\z/) {
 
+        require CHI;
         require Module::Path;
+
+        my @recurse_blacklist = (
+            'Module::List', # segfaults on my pc
+        );
+
+        my $chi = CHI->new(driver => $args{cache_prereqscanner} ? "File" : "Null");
 
         my $recurse = $1 ? 1:0;
         my %seen_mods; # for limiting recursion
@@ -221,29 +249,61 @@ sub tracepm {
         $scan = sub {
             my $file = shift;
             $log->infof("Scanning %s ...", $file);
-            my $sres = $scanner->scan_file($file);
+            my $cache_key = "tracepm-$method-$file";
+            my $sres = $chi->compute(
+                $cache_key, "24h", # XXX cache should check timestamp
+                sub { $scanner->scan_file($file) },
+            );
             my $reqs = $sres->{requirements};
 
             my @new; # new modules to check
+          MOD:
             for my $mod (keys %$reqs) {
                 next if $mod =~ /\A(perl)\z/;
                 my $req = $reqs->{$mod};
                 my $v = $req->{minimum}{original};
                 my $r = {module=>$mod, version=>$v};
 
-                # find new modules to do recurse scanning
+              CHECK_RECURSE:
                 {
                     last unless $recurse;
-                    last if $seen_mods{$mod}++;
-                    my $is_core = Module::CoreList::is_core($mod, undef, $plver); # XXX use $v?
-                    if ($is_core) {
-                        $log->infof("Skipped recursing to %s: core module", $mod);
-                        last;
-                    }
+                    last MOD if $seen_mods{$mod}++;
                     my $path = Module::Path::module_path($mod);
                     unless ($path) {
                         $log->infof("Skipped recursing to %s: path not found", $mod);
                         last;
+                    }
+                    if ($mod ~~ @recurse_blacklist) {
+                        $log->infof("Skipped recursing to %s: excluded by hard-coded blacklist", $mod);
+                        last;
+                    }
+                    if ($args{recurse_exclude}) {
+                        if ($mod ~~ @{ $args{recurse_exclude} }) {
+                            $log->infof("Skipped recursing to %s: excluded by list", $mod);
+                            last;
+                        }
+                    }
+                    if ($args{recurse_exclude_pattern}) {
+                        for (@{ $args{recurse_exclude_pattern} }) {
+                            if ($mod =~ /$_/) {
+                                $log->infof("Skipped recursing to %s: excluded by pattern %s", $mod, $_);
+                                last CHECK_RECURSE;
+                            }
+                        }
+                    }
+                    if ($args{recurse_exclude_core}) {
+                        my $is_core = Module::CoreList::is_core(
+                            $mod, undef, $plver); # XXX use $v?
+                        if ($is_core) {
+                            $log->infof("Skipped recursing to %s: core module", $mod);
+                        }
+                    }
+                    if ($args{recurse_exclude_xs}) {
+                        my $is_xs = is_xs($mod);
+                        if ($is_xs) {
+                            $log->infof("Skipped recursing to %s: XS module", $mod);
+                            last;
+                        }
                     }
                     push @new, $path;
                 }
