@@ -1,5 +1,10 @@
 Revision history for App-tracepm
 
+0.04    2014-04-11 (SHARYANTO)
+
+        - Add methods: prereqscanner{,_lite}{,_recurse}.
+
+
 0.03    2014-04-10 (SHARYANTO)
 
         - Add field 'by' for method 'require', to see which package loads which
