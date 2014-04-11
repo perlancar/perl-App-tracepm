@@ -10,7 +10,7 @@ use Perinci::CmdLine 1.06;
 
 Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
 
-#ABSTRACT: Trace dependencies of your Perl script file
+#ABSTRACT: Trace dependencies of your Perl script
 #PODNAME: tracepm
 
 =head1 SYNOPSIS
@@ -18,8 +18,8 @@ Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
  # trace Perl modules being required
  % tracepm script.pl
 
- # only list non-core+XS modules
- % tracepm --xs --nocore script.pl
+ # use Perl::PrereqScanner::Lite, only list non-core+XS modules
+ % tracepm --method prereqscanner_lite --xs --nocore script.pl
 
  # see more options
  % tracepm --help
@@ -27,17 +27,5 @@ Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
 
 =head1 DESCRIPTION
 
-B<tracepm> runs your Perl script under C<perl -c> and lists modules being
-required. You can filter only displaying the modules matching some criteria.
-
-
-=head1 TODO
-
-=over
-
-=item * Option to use C<perl> instead of C<perl -c>
-
-To be able to include modules being required during run-time instead of
-compile-time.
-
-=back
+B<tracepm> traces dependencies (required Perl modules) of your Perl scripts
+using one of several available methods.
