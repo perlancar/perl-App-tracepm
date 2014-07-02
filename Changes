@@ -1,5 +1,14 @@
 Revision history for App-tracepm
 
+0.05    2014-07-02 (SHARYANTO)
+
+        - No functional changes.
+
+        - [Bugfix] scripts/ or bin/ files need to have something like #!perl and
+          not #!/usr/bin/env perl so it can be replaced to the path of perl when
+          installing [RT#96884]
+
+
 0.04    2014-04-11 (SHARYANTO)
 
         - Add methods: prereqscanner{,_lite}{,_recurse}.
