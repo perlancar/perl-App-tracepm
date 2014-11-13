@@ -328,6 +328,10 @@ sub tracepm {
         }
         $scan->($args{script});
 
+    } else {
+
+        return [400, "Unknown trace method '$method'"];
+
     } # if method
 
     unless ($args{detail}) {
