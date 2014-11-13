@@ -1,5 +1,12 @@
 Revision history for App-tracepm
 
+0.08    2014-11-13 (PERLANCAR)
+
+	- No functional changes.
+
+	- [ux] Return error if unknown method specified.
+
+
 0.07    2014-11-09 (PERLANCAR)
 
 	- Switch CLI script to using Perinci::CmdLine::Lite, now that
