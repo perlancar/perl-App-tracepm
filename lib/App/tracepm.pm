@@ -1,5 +1,8 @@
 package App::tracepm;
 
+# DATE
+# VERSION
+
 use 5.010001;
 use strict;
 use warnings;
@@ -7,10 +10,8 @@ use experimental 'smartmatch';
 use Log::Any '$log';
 
 use Module::CoreList;
-use SHARYANTO::Module::Util qw(is_xs);
+use Module::MoreUtil qw(is_xs);
 use version;
-
-# VERSION
 
 our %SPEC;
 
