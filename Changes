@@ -1,5 +1,12 @@
 Revision history for App-tracepm
 
+0.09    2014-12-04 (PERLANCAR)
+
+	- No functional changes.
+
+	- Switch from SHARYANTO::Module::Util to Module::MoreUtil.
+
+
 0.08    2014-11-13 (PERLANCAR)
 
 	- No functional changes.
