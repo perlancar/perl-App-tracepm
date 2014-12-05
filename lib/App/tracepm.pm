@@ -10,7 +10,7 @@ use experimental 'smartmatch';
 use Log::Any '$log';
 
 use Module::CoreList;
-use Module::MoreUtil qw(is_xs);
+use Module::XSOrPP qw(is_xs);
 use version;
 
 our %SPEC;
