@@ -1,5 +1,12 @@
 Revision history for App-tracepm
 
+0.10    2014-12-05 (PERLANCAR)
+
+	- No functional changes.
+
+	- Update renamed module Module::MoreUtil -> Module::XSOrPP.
+
+
 0.09    2014-12-04 (PERLANCAR)
 
 	- No functional changes.
