@@ -30,6 +30,7 @@ our $tablespec = {
 
 $SPEC{tracepm} = {
     v => 1.1,
+    summary => 'Trace dependencies of your Perl script',
     args => {
         script => {
             summary => 'Path to script file (script to be packed)',
@@ -345,7 +346,7 @@ sub tracepm {
 }
 
 1;
-# ABSTRACT: Trace dependencies of your Perl script
+# ABSTRACT:
 
 =for Pod::Coverage ^()$
 
