@@ -1,5 +1,11 @@
 Revision history for App-tracepm
 
+0.11    2014-12-26 (PERLANCAR)
+
+	- [Bugfix] Set minimum version for Module::CoreList which has
+	  is_core() [GH#4].
+
+
 0.10    2014-12-05 (PERLANCAR)
 
 	- No functional changes.
