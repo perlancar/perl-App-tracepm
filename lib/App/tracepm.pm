@@ -235,7 +235,7 @@ sub tracepm {
     } elsif ($method =~ /\A(?:prereqscanner|prereqscanner_lite)(_recurse)?\z/) {
 
         require CHI;
-        require Module::Path;
+        require Module::Path::More;
 
         my @recurse_blacklist = (
             'Module::List', # segfaults on my pc
@@ -270,7 +270,7 @@ sub tracepm {
                 {
                     last unless $recurse;
                     last MOD if $seen_mods{$mod}++;
-                    my $path = Module::Path::module_path($mod);
+                    my $path = Module::Path::More::module_path(module=>$mod);
                     unless ($path) {
                         $log->infof("Skipped recursing to %s: path not found", $mod);
                         last;
