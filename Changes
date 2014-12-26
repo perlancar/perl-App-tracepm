@@ -1,5 +1,13 @@
 Revision history for App-tracepm
 
+0.12    2014-12-26 (PERLANCAR)
+
+	- No functional changes.
+
+	- Replace Module::Path with Module::Path::More, because I think I
+	  want to avoid abs_path().
+
+
 0.11    2014-12-26 (PERLANCAR)
 
 	- [Bugfix] Set minimum version for Module::CoreList which has
