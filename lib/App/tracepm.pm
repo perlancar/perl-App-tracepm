@@ -9,8 +9,7 @@ use warnings;
 use experimental 'smartmatch';
 use Log::Any '$log';
 
-use Module::CoreList;
-use Module::XSOrPP qw(is_xs);
+use File::Temp qw(tempfile);
 use version;
 
 our %SPEC;
@@ -156,12 +155,22 @@ _
 sub tracepm {
     my %args = @_;
 
+    my $script = $args{script};
+    unless (defined $script) {
+        my $eval = $args{eval};
+        defined($eval) or die "Please specify input script or --eval (-e)\n";
+        my ($fh, $filename) = tempfile();
+        print $fh $eval;
+        $script = $filename;
+    }
+
     my $method = $args{method};
     my $plver = version->parse($args{perl_version} // $^V);
 
     my $add_fields_and_filter_1 = sub {
         my $r = shift;
         if ($args{detail} || defined($args{core})) {
+            require Module::CoreList;
             my $is_core = Module::CoreList::is_core(
                 $r->{module}, undef, $plver);
             return 0 if defined($args{core}) && ($args{core} xor $is_core);
@@ -169,7 +178,8 @@ sub tracepm {
         }
 
         if ($args{detail} || defined($args{xs})) {
-            my $is_xs = is_xs($r->{module});
+            require Module::XSOrPP;
+            my $is_xs = Module::XSOrPP::is_xs($r->{module});
             return 0 if defined($args{xs}) && (
                 !defined($is_xs) || ($args{xs} xor $is_xs));
             $r->{is_xs} = $is_xs;
@@ -294,6 +304,7 @@ sub tracepm {
                         }
                     }
                     if ($args{recurse_exclude_core}) {
+                        require Module::CoreList;
                         my $is_core = Module::CoreList::is_core(
                             $mod, undef, $plver); # XXX use $v?
                         if ($is_core) {
@@ -301,7 +312,8 @@ sub tracepm {
                         }
                     }
                     if ($args{recurse_exclude_xs}) {
-                        my $is_xs = is_xs($mod);
+                        require Module::XSOrPP;
+                        my $is_xs = Module::XSOrPP::is_xs($mod);
                         if ($is_xs) {
                             $log->infof("Skipped recursing to %s: XS module", $mod);
                             last;
