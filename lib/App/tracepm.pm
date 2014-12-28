@@ -34,8 +34,14 @@ $SPEC{tracepm} = {
         script => {
             summary => 'Path to script file (script to be packed)',
             schema => ['str*'],
-            req => 1,
             pos => 0,
+            tags => ['category:input'],
+        },
+        eval => {
+            summary => 'Specify script from command-line instead',
+            schema  => 'str*',
+            cmdline_aliases => {e=>{}},
+            tags => ['category:input'],
         },
         method => {
             summary => 'Tracing method to use',
@@ -190,8 +196,7 @@ sub tracepm {
     my @res;
     if ($method =~ /\A(fatpacker|require)\z/) {
 
-        require File::Temp;
-        my ($outfh, $outf) = File::Temp::tempfile();
+        my ($outfh, $outf) = tempfile();
 
         if ($method eq 'fatpacker') {
             require App::FatPacker;
@@ -199,14 +204,14 @@ sub tracepm {
             $fp->trace(
                 output => ">>$outf",
                 use    => $args{use},
-                args   => [$args{script}, @{$args{args} // []}],
+                args   => [$script, @{$args{args} // []}],
             );
         } else {
             # 'require' method
             system($^X,
                    "-MApp::tracepm::Tracer=$outf",
                    (map {"-M$_"} @{$args{use} // []}),
-                   $args{script}, @{$args{args} // []},
+                   $script, @{$args{args} // []},
                );
         }
 
@@ -340,7 +345,7 @@ sub tracepm {
             require Perl::PrereqScanner::Lite;
             $scanner = Perl::PrereqScanner::Lite->new;
         }
-        $scan->($args{script});
+        $scan->($script);
 
     } else {
 
