@@ -371,15 +371,3 @@ sub tracepm {
 
 This distribution provides command-line utility called L<tracepm>.
 
-
-=head1 TODO
-
-=over
-
-=item * 'use' args not yet respected if 'method' =~ /prereqscanner/
-
-=item * Option to silent STDOUT and/or STDERR output of script.
-
-=back
-
-=cut
