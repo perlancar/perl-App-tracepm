@@ -7,9 +7,8 @@ use 5.010001;
 use strict;
 use warnings;
 use experimental 'smartmatch';
-use Log::Any '$log';
+use Log::Any::IfLOG '$log';
 
-use File::Temp qw(tempfile);
 use version;
 
 our %SPEC;
@@ -159,13 +158,15 @@ _
     },
 };
 sub tracepm {
+    require File::Temp;
+
     my %args = @_;
 
     my $script = $args{script};
     unless (defined $script) {
         my $eval = $args{eval};
         defined($eval) or die "Please specify input script or --eval (-e)\n";
-        my ($fh, $filename) = tempfile();
+        my ($fh, $filename) = File::Temp::tempfile();
         print $fh $eval;
         $script = $filename;
     }
@@ -196,7 +197,7 @@ sub tracepm {
     my @res;
     if ($method =~ /\A(fatpacker|require)\z/) {
 
-        my ($outfh, $outf) = tempfile();
+        my ($outfh, $outf) = File::Temp::tempfile();
 
         if ($method eq 'fatpacker') {
             require App::FatPacker;
