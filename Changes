@@ -1,5 +1,10 @@
 Revision history for App-tracepm
 
+0.15    2015-04-14 (PERLANCAR)
+
+	- Add option: --trap-script-output.
+
+
 0.14    2015-01-03 (PERLANCAR)
 
 	- No functional changes.
