@@ -120,16 +120,22 @@ _
             pos => 1,
             greedy => 1,
         },
-        multiple_args => {
+        multiple_runs => {
             # XXX add args_rels: conflict with args
-            summary => 'A set of args, run script multiple times',
-            schema => ['array*' => of => ['array*' => of => 'str*']],
+            summary => 'Parameter to run script multiple times',
+            schema => ['array*' => of => 'hash*'],
             description => <<'_',
 
-An alternative to using `args`. Script will be run multiple times, each with a
-set of args from this.
+A more general alternative to using `args`. Script will be run multiple times,
+each with setting from element of this option.
 
 Can be used to reach multiple run pathways and trace more modules.
+
+Example:
+
+    [{"args":["-h"]}, # help mode
+     {"args":[""], "env":{"COMP_LINE":"cmd x", "COMP_POINT":5}},
+    ],
 
 _
         },
@@ -232,14 +238,33 @@ sub tracepm {
         } else {
             # 'require' method
             $routine = sub {
-                my @args_sets = $args{multiple_args} ?
-                    @{ $args{multiple_args} } : ($args{args});
-                local $ENV{TRACEPM_TRACER_APPEND} = 1;
-                for my $args (@args_sets) {
+                if ($args{multiple_runs}) {
+                    local $ENV{TRACEPM_TRACER_APPEND} = 1;
+                    for my $run (@{ $args{multiple_runs} }) {
+                        my $save_env;
+                        if ($run->{env}) {
+                            $save_env = {};
+                            for (keys %{ $run->{env} }) {
+                                $save_env->{$_} = $ENV{$_};
+                                $ENV{$_} = $run->{env}{$_};
+                            }
+                        }
+                        system($^X,
+                               "-MApp::tracepm::Tracer=$outf",
+                               (map {"-M$_"} @{$args{use} // []}),
+                               $script, @{$run->{args} // []},
+                           );
+                        if ($save_env) {
+                            for (keys %$save_env) {
+                                $ENV{$_} = $save_env->{$_};
+                            }
+                        }
+                    }
+                } else {
                     system($^X,
                            "-MApp::tracepm::Tracer=$outf",
                            (map {"-M$_"} @{$args{use} // []}),
-                           $script, @{$args // []},
+                           $script, @{$args{args} // []},
                        );
                 }
             };
