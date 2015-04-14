@@ -1,5 +1,14 @@
 Revision history for App-tracepm
 
+0.17    2015-04-15 (PERLANCAR)
+
+        - [Bugfix] To append output file in multiple run, we can't use package
+          variable but must use env var.
+
+        - Replace --multiple-args with the more generic --multiple-runs (allow
+          setting env per run).
+
+
 0.16    2015-04-15 (PERLANCAR)
 
 	- Add option --multiple-args.
