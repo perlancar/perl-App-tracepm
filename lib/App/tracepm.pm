@@ -234,7 +234,7 @@ sub tracepm {
             $routine = sub {
                 my @args_sets = $args{multiple_args} ?
                     @{ $args{multiple_args} } : ($args{args});
-                local $App::tracepm::Tracer::APPEND_MODE = 1;
+                local $ENV{TRACEPM_TRACER_APPEND} = 1;
                 for my $args (@args_sets) {
                     system($^X,
                            "-MApp::tracepm::Tracer=$outf",
