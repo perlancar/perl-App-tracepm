@@ -107,6 +107,12 @@ _
             summary => 'When recursing, exclude core modules',
             schema => ['bool'],
         },
+        trap_script_output => {
+            # XXX relevant only when method=trace or method=require
+            summary => 'Trap script output so it does not interfere '.
+                'with trace result',
+            schema => ['bool', is=>1],
+        },
         args => {
             summary => 'Script arguments',
             schema => ['array*' => of => 'str*'],
@@ -199,21 +205,33 @@ sub tracepm {
 
         my ($outfh, $outf) = File::Temp::tempfile();
 
+        my $routine;
         if ($method eq 'fatpacker') {
-            require App::FatPacker;
-            my $fp = App::FatPacker->new;
-            $fp->trace(
-                output => ">>$outf",
-                use    => $args{use},
-                args   => [$script, @{$args{args} // []}],
-            );
+            $routine = sub {
+                require App::FatPacker;
+                my $fp = App::FatPacker->new;
+                $fp->trace(
+                    output => ">>$outf",
+                    use    => $args{use},
+                    args   => [$script, @{$args{args} // []}],
+                );
+            };
         } else {
             # 'require' method
-            system($^X,
-                   "-MApp::tracepm::Tracer=$outf",
-                   (map {"-M$_"} @{$args{use} // []}),
-                   $script, @{$args{args} // []},
-               );
+            $routine = sub {
+                system($^X,
+                       "-MApp::tracepm::Tracer=$outf",
+                       (map {"-M$_"} @{$args{use} // []}),
+                       $script, @{$args{args} // []},
+                   );
+            };
+        }
+
+        if ($args{trap_script_output}) {
+            require Capture::Tiny;
+            Capture::Tiny::capture_merged($routine);
+        } else {
+            $routine->();
         }
 
         open my($fh), "<", $outf
