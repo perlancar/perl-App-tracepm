@@ -183,8 +183,8 @@ sub tracepm {
     my $add_fields_and_filter_1 = sub {
         my $r = shift;
         if ($args{detail} || defined($args{core})) {
-            require Module::CoreList;
-            my $is_core = Module::CoreList::is_core(
+            require Module::CoreList::More;
+            my $is_core = Module::CoreList::More->is_still_core(
                 $r->{module}, undef, $plver);
             return 0 if defined($args{core}) && ($args{core} xor $is_core);
             $r->{is_core} = $is_core;
@@ -328,8 +328,8 @@ sub tracepm {
                         }
                     }
                     if ($args{recurse_exclude_core}) {
-                        require Module::CoreList;
-                        my $is_core = Module::CoreList::is_core(
+                        require Module::CoreList::More;
+                        my $is_core = Module::CoreList::More->is_still_core(
                             $mod, undef, $plver); # XXX use $v?
                         if ($is_core) {
                             $log->infof("Skipped recursing to %s: core module", $mod);
