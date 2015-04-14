@@ -1,5 +1,13 @@
 Revision history for App-tracepm
 
+0.16    2015-04-15 (PERLANCAR)
+
+	- Add option --multiple-args.
+
+	- Replace Module::CoreList with Module::CoreList::More (we're using
+	  is_still_core()).
+
+
 0.15    2015-04-14 (PERLANCAR)
 
 	- Add option: --trap-script-output.
