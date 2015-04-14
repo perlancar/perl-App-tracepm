@@ -112,7 +112,7 @@ _
             schema => ['array*' => of => 'str*'],
             req => 0,
             pos => 1,
-            greedy => 0,
+            greedy => 1,
         },
         perl_version => {
             summary => 'Perl version, defaults to current running version',
@@ -371,4 +371,3 @@ sub tracepm {
 =head1 SYNOPSIS
 
 This distribution provides command-line utility called L<tracepm>.
-

@@ -1,5 +1,6 @@
 package App::tracepm::Tracer;
 
+# DATE
 # VERSION
 
 # saving CORE::GLOBAL::require doesn't work
