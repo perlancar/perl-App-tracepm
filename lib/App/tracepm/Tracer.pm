@@ -3,6 +3,8 @@ package App::tracepm::Tracer;
 # DATE
 # VERSION
 
+our $APPEND_MODE = 0;
+
 # saving CORE::GLOBAL::require doesn't work
 my $orig_require;
 
@@ -22,7 +24,7 @@ sub import {
     my $file = shift
         or die "Usage: use App::tracerpm::Tracer '/path/to/output'";
 
-    open my($fh), ">", $file or die "Can't open $file: $!";
+    open my($fh), ($APPEND_MODE?">>":">"), $file or die "Can't open $file: $!";
 
     #$orig_require = \&CORE::GLOBAL::require;
     *CORE::GLOBAL::require = sub {

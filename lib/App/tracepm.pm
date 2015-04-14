@@ -120,6 +120,19 @@ _
             pos => 1,
             greedy => 1,
         },
+        multiple_args => {
+            # XXX add args_rels: conflict with args
+            summary => 'A set of args, run script multiple times',
+            schema => ['array*' => of => ['array*' => of => 'str*']],
+            description => <<'_',
+
+An alternative to using `args`. Script will be run multiple times, each with a
+set of args from this.
+
+Can be used to reach multiple run pathways and trace more modules.
+
+_
+        },
         perl_version => {
             summary => 'Perl version, defaults to current running version',
             description => <<'_',
@@ -219,11 +232,16 @@ sub tracepm {
         } else {
             # 'require' method
             $routine = sub {
-                system($^X,
-                       "-MApp::tracepm::Tracer=$outf",
-                       (map {"-M$_"} @{$args{use} // []}),
-                       $script, @{$args{args} // []},
-                   );
+                my @args_sets = $args{multiple_args} ?
+                    @{ $args{multiple_args} } : ($args{args});
+                local $App::tracepm::Tracer::APPEND_MODE = 1;
+                for my $args (@args_sets) {
+                    system($^X,
+                           "-MApp::tracepm::Tracer=$outf",
+                           (map {"-M$_"} @{$args{use} // []}),
+                           $script, @{$args // []},
+                       );
+                }
             };
         }
 
