@@ -12,6 +12,10 @@ sub import {
     # already installed
     return if $orig_require;
 
+    # doesn't mention any file, e.g. in 00-compile.t
+    my $file = shift
+        or return;
+
     my $opts = {
         workaround_log4perl => 1,
     };
@@ -19,8 +23,6 @@ sub import {
         $opts = shift;
     }
 
-    my $file = shift
-        or die "Usage: use App::tracerpm::Tracer '/path/to/output'";
 
     open my($fh), ($ENV{TRACEPM_TRACER_APPEND} ? ">>":">"),
         $file or die "Can't open $file: $!";
