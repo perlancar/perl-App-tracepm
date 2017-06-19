@@ -7,7 +7,7 @@ use 5.010001;
 use strict;
 use warnings;
 use experimental 'smartmatch';
-use Log::Any::IfLOG '$log';
+use Log::ger;
 
 use version;
 
@@ -283,7 +283,7 @@ sub tracepm {
         my $i = 0;
         while (<$fh>) {
             chomp;
-            $log->trace("got line: $_");
+            log_trace "got line: $_";
 
             my $r = {};
             $i++;
@@ -327,7 +327,7 @@ sub tracepm {
         my $scan;
         $scan = sub {
             my $file = shift;
-            $log->infof("Scanning %s ...", $file);
+            log_info "Scanning %s ...", $file;
             my $cache_key = "tracepm-$method-$file";
             my $sres = $chi->compute(
                 $cache_key, "24h", # XXX cache should check timestamp
@@ -349,23 +349,23 @@ sub tracepm {
                     last MOD if $seen_mods{$mod}++;
                     my $path = Module::Path::More::module_path(module=>$mod);
                     unless ($path) {
-                        $log->infof("Skipped recursing to %s: path not found", $mod);
+                        log_info "Skipped recursing to %s: path not found", $mod;
                         last;
                     }
                     if ($mod ~~ @recurse_blacklist) {
-                        $log->infof("Skipped recursing to %s: excluded by hard-coded blacklist", $mod);
+                        log_info "Skipped recursing to %s: excluded by hard-coded blacklist", $mod;
                         last;
                     }
                     if ($args{recurse_exclude}) {
                         if ($mod ~~ @{ $args{recurse_exclude} }) {
-                            $log->infof("Skipped recursing to %s: excluded by list", $mod);
+                            log_info "Skipped recursing to %s: excluded by list", $mod;
                             last;
                         }
                     }
                     if ($args{recurse_exclude_pattern}) {
                         for (@{ $args{recurse_exclude_pattern} }) {
                             if ($mod =~ /$_/) {
-                                $log->infof("Skipped recursing to %s: excluded by pattern %s", $mod, $_);
+                                log_info "Skipped recursing to %s: excluded by pattern %s", $mod, $_;
                                 last CHECK_RECURSE;
                             }
                         }
@@ -375,14 +375,14 @@ sub tracepm {
                         my $is_core = Module::CoreList::More->is_still_core(
                             $mod, undef, $plver); # XXX use $v?
                         if ($is_core) {
-                            $log->infof("Skipped recursing to %s: core module", $mod);
+                            log_info "Skipped recursing to %s: core module", $mod;
                         }
                     }
                     if ($args{recurse_exclude_xs}) {
                         require Module::XSOrPP;
                         my $is_xs = Module::XSOrPP::is_xs($mod);
                         if ($is_xs) {
-                            $log->infof("Skipped recursing to %s: XS module", $mod);
+                            log_info "Skipped recursing to %s: XS module", $mod;
                             last;
                         }
                     }
@@ -393,7 +393,7 @@ sub tracepm {
                 push @res, $r;
             }
             if (@new) {
-                $log->debugf("Recursively scanning %s ...", join(", ", @new));
+                log_debug "Recursively scanning %s ...", join(", ", @new);
                 $scan->($_) for @new;
             }
         };
