@@ -29,11 +29,15 @@ our $tablespec = {
 $SPEC{tracepm} = {
     v => 1.1,
     summary => 'Trace dependencies of your Perl script',
+    args_rels => {
+        req_one => [qw/script module eval/],
+    },
     args => {
         script => {
-            summary => 'Path to script file (script to be packed)',
+            summary => 'Path to script file',
             schema => ['str*'],
             pos => 0,
+            cmdline_aliases => {s=>{}},
             tags => ['category:input'],
         },
         eval => {
@@ -42,6 +46,13 @@ $SPEC{tracepm} = {
             cmdline_aliases => {e=>{}},
             tags => ['category:input'],
         },
+        module => {
+            summary => "--module MOD is equivalent to --script 'use MOD'",
+            schema  => 'str*',
+            cmdline_aliases => {m=>{}},
+            tags => ['category:input'],
+        },
+
         method => {
             summary => 'Tracing method to use',
             schema => ['str*',
@@ -187,12 +198,21 @@ sub tracepm {
 
     my %args = @_;
 
-    my $script = $args{script};
-    unless (defined $script) {
-        my $eval = $args{eval};
-        defined($eval) or die "Please specify input script or --eval (-e)\n";
+    my $script;
+    {
+        if (defined $args{script}) {
+            $script = $args{script};
+            last;
+        }
         my ($fh, $filename) = File::Temp::tempfile();
-        print $fh $eval;
+        if (defined $args{module}) {
+            print $fh "use $args{module};\n";
+        } elsif (defined $args{eval}) {
+            print $fh $args{eval};
+        } else {
+            die "Please specify input via one of ".
+                "--script (-s), --module (-m), or --eval (-e)\n";
+        }
         $script = $filename;
     }
 
@@ -414,6 +434,10 @@ sub tracepm {
         return [400, "Unknown trace method '$method'"];
 
     } # if method
+
+    if (defined $args{module}) {
+        @res = grep { $_->{module} ne $args{module} } @res;
+    }
 
     unless ($args{detail}) {
         @res = map {$_->{module}} @res;
