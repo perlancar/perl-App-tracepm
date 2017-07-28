@@ -1,3 +1,10 @@
+0.21    2017-07-29 (PERLANCAR)
+
+	- Add option --module.
+
+	- [ux] Add -l as shortcut option for --detail.
+
+
 0.20    2017-07-10 (PERLANCAR)
 
 	- No functional changes.
