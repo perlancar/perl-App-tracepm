@@ -175,6 +175,7 @@ _
         detail => {
             summary => 'Whether to return records instead of just module names',
             schema => ['bool' => default=>0],
+            cmdline_aliases => {l=>{}},
             tags => ['category:field-selection'],
         },
         core => {
