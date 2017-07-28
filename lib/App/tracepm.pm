@@ -35,7 +35,7 @@ $SPEC{tracepm} = {
     args => {
         script => {
             summary => 'Path to script file',
-            schema => ['str*'],
+            schema => ['filename*'],
             pos => 0,
             cmdline_aliases => {s=>{}},
             tags => ['category:input'],
@@ -48,7 +48,7 @@ $SPEC{tracepm} = {
         },
         module => {
             summary => "--module MOD is equivalent to --script 'use MOD'",
-            schema  => 'str*',
+            schema  => 'perl::modname*',
             cmdline_aliases => {m=>{}},
             tags => ['category:input'],
         },
