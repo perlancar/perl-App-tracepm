@@ -1,6 +1,10 @@
+# we need to run without loading any module
+## no critic: TestingAndDebugging::RequireUseStrict
 package App::tracepm::Tracer;
 
+# AUTHORITY
 # DATE
+# DIST
 # VERSION
 
 # saving CORE::GLOBAL::require doesn't work

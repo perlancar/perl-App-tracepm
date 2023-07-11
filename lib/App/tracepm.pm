@@ -1,15 +1,15 @@
 package App::tracepm;
 
-# DATE
-# VERSION
-
 use 5.010001;
 use strict;
+use version;
 use warnings;
-use experimental 'smartmatch';
 use Log::ger;
 
-use version;
+# AUTHORITY
+# DATE
+# DIST
+# VERSION
 
 our %SPEC;
 
@@ -373,12 +373,12 @@ sub tracepm {
                         log_info "Skipped recursing to %s: path not found", $mod;
                         last;
                     }
-                    if ($mod ~~ @recurse_blacklist) {
+                    if (grep { $_ eq $mod } @recurse_blacklist) {
                         log_info "Skipped recursing to %s: excluded by hard-coded blacklist", $mod;
                         last;
                     }
                     if ($args{recurse_exclude}) {
-                        if ($mod ~~ @{ $args{recurse_exclude} }) {
+                        if (grep { $_ eq $mod } @{ $args{recurse_exclude} }) {
                             log_info "Skipped recursing to %s: excluded by list", $mod;
                             last;
                         }
