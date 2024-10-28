@@ -2,3 +2,4 @@ App-tracepm-*
 .build
 *~
 nytprof*
+.DS_Store
